@@ -111,8 +111,109 @@
   + 따라서, 대규모 배치 처리뿐만 아니라 대화형 쿼리 실행(SQL)과 실시간 스트림 처리에 이르기까지 널리 이용됨.
 
 # 3.2. 쿼리 엔진
+- 'Hive'에 의한 구조화 데이터의 생성과 'Prsto'에 의한 대화식 쿼리를 사용해 데이터 마트를 만들기까지의 흐름을 살펴본다.
 ## 데이터 마트 구축의 파이프라인
+<img width="485" alt="image" src="https://github.com/led156/TIL/assets/67251510/f0f0417e-8f98-4f09-9e5e-f3c80a65e1c7">
 
+- ❶ 분산 스토리지에 저장된 데이터를 구조화, 열 지향 스토리지 형식으로 저장.
+  + 다수의 텍스트 파일을 읽어 가공하는 큰 부하의 처리 : Hive 사용
+  + Hive에서 만든 각 테이블 정보는 'Hive 메타 스토어(Hive metastore)'라고 불리는 특별한 데이터베이스에 저장됨.
+- ❷ 구조화 데이터를 결합, 집계하고 비정규화 테이블로 데이터 마트에 써서 내보냄.
+  + 열 지향 스토리지를 이용한 쿼리 실행 : Presto 사용 (시간 단축)
+
+## Hive에 의한 구조화 데이터 작성
+1. CSV파일 읽어 들이기.
+   ```Hive
+   hive> CREATE EXTERNAL TABLE access_log_csv( /* 외부 테이블 지정 */
+       >   time string, request string, status int, bytes int
+       > )
+       > ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+       > STORED AS TEXTFILE LOCATION '/var/log/access_log/' /* 경로 지정 */
+       > TBLPROPERTIES ('skip.header.line.count'='1'); /* CSV의 헤더행 스킵 */
+   ```
+   - 외부 테이블 : Hive 외부에 있는 파일을 참고해 마치 거기에 테이블이 존재하는 것처럼 읽어 들이기 위해 지정하는 것.
+   - `access_log_csv`라는 테이블명을 참고해 데이터를 추출, 텍스트 파일이 로드되고 구조화 데이터로의 변환이 이뤄짐.
+   - 대부분 SQL-on-Hadoop 쿼리 엔진은 데이터를 내부로 가져오지 않아도 텍스트 파일을 그대로 집계할 수 있음.
+
+   ```Hive
+   hive> SELECT status, count(*) cnt
+       > FROM access_log_csv GROUP BY status LIMIT 2;
+   Time taken: 8.664 seconds
+   ```
+   - 이와 같이 외부 테이블로 지정한 경로에 포함된 모든 CSV 파일이 로드되고 집계됨.
+   - → 애드 혹 데이터를 분석하기에 유용, 시간을 들여 데이터를 전송하지 않아도 원하는 정보를 얻을 수 있음.
+   - 다만, 매번 쿼리 실행마다 매번 텍스트 파일을 불러오기 때문에 빠르다고 할 수는 없음. → 따라서 열 지향 스토리지로 변환 필요.
+
+### 열 지향 스토리지로의 변환
+2. 테이블을 열 지향 스토리지 형식인 ORC 형식으로 변환.
+   ```Hive
+   /* ORC 형식의 테이블 'access_log_orc'로 변환 */
+   hive> CREATE TABLE access_log_orc STORED AS ORC AS
+       > SELECT cast(time AS timestamp) time,
+       >        request, status,
+       >        cast(bytes AS bigint) bytes
+       > FROM access_log_csv;
+   hive> SELECT status, count(*) cnt
+       > FROM access_log_orc GROUP BY status LIMIT 2;
+   Time taken: 1.567 seconds
+   ```
+   - 텍스트 데이터를 열 지향 스토리지로 변환함으로써 데이터 집계 속도가 고속화됨.
+   - 다만, 변환에 시간이 걸리므로, Hive와 같은 배치형의 쿼리 엔진에서 실행하는데 적합.
+   - 이와 같이 SELECT문으로 새로운 테이블을 만드는 것이 데이터 구조화 프로세스에 해당한다.
+
+### Hive로 비정규화 테이블을 작성하기
+- 데이터 구조화가 완료되면 다음으로는 데이터 마트의 구축이 있다.
+  + 즉, 테이블을 결합, 집약해서 '비정규화 테이블'을 만든다.
+  + Presto(대화형 쿼리 엔진) vs. Hive(배치형 쿼리 엔진) 을 사용할지?
+    * 이때 쿼리 엔진 자체의 성능은 최종적 실행 시간에 그다지 많은 영향을 끼치지 않는데,
+    * 따라서 배치형 시스템을 사용하는 편이 레코드수가 많을수록 리소스 이용 효율을 높일 수 있다 → Hive
+  + 다만, 비정규화 테이블을 만들 때 오랜 시간이 걸리는 것은 일반적이다. 따라서 효율적인 쿼리를 작성하여 보다 최적화시켜야한다.
+
+### 서브 쿼리 안에서 레코드 수 줄이기
+1. 초기 단계에서 팩트 테이블을 작게 하여 쿼리 최적화.
+- Hive가 읽어 들이는 데이터의 양을 의식하면서 쿼리를 작성하지 않으면 생각만큼의 성능이 나오지 않음. (Hive가 데이터베이스가 아니라 데이터 처리를 위한 배치 처리 구조이기 때문,)
+- ❶ 비효율적인 쿼리 예
+  + ```Hive
+    SELECT ...
+    FROM access_log a
+    JOIN users b ON b.id = a.user_id
+    WHERE b.created_at = '2017-01-01'
+    ```
+  + 팩트 테이블(`access_log`), 디멘전 테이블(`users`)
+  + 팩트 테이블을 필터링할 조건이 없기 때문에, 모든 데이터를 읽어 들인 후에 결합하고 이후에 나오는 WHERE에 의한 검색을 하게 됨. → 대량의 중간 데이터가 생성됨. (시간이 지날수록 팩트 테이블의 크기가 커지기 때문에, 문제가 된다.)
+ 
+    
+- ❷ 효율적인 쿼리 예
+  + ```Hive
+    SELECT ...
+    FROM (
+      SELECT * access_log
+      WHERE time >= TIMESTAMP '2017-01-01 00:00:00'
+    ) a
+    JOIN users b ON b.id = a.user_id
+    WHERE b.created_at = '2017-01-01'
+    ```
+  + 따라서 서브 쿼리 안에서 팩트 테이블을 작게 하기.
+  + = 데이터 양을 감소시킨 후에 테이블을 결합하는 것
+
+### 데이터의 편향을 방지하는 방법
+2. 분산 시스템의 성능 발휘를 하여 쿼리 최적화.
+- 고속화를 방해하는 다른 하나의 문제는 '데이터의 편차(data skew, 데이터 스큐)'이다.
+- 만약 분산되어 있는 데이터를 한곳에 모아 중복이 없는 값을 세어야하는 작업을 하려면, 분산 처리가 어려워 다른 처리보다 시간이 오래 걸린다. (`SELECT count(dinstinct ..`)
+- ❶ 비효율적인 쿼리 예
+  + ```Hive
+    SELECT date, count(distinct user_id) users
+    FROM access_log GROUP BY date
+    ```
+  
+ 
+    
+- ❷ 효율적인 쿼리 예
+  + ```Hive
+    SELECT date, count(*) users
+    FROM ( SELECT DISTINCT date, user_id FROM access_log ) t
+    GROUP BY date
+    ```
 
 # 3.3.
 
