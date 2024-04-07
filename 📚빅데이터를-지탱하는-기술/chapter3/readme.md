@@ -272,15 +272,19 @@
 2. 브로드캐스트 결합(broadcast join)
 - 결합하는 테이블의 모든 데이터가 각 노드에 복사됨.
 <img width="445" alt="image" src="https://github.com/led156/TIL/assets/67251510/2cd75a3b-e13a-4554-8fe0-bbdbc1a32a2f">
+
 - 하나의 팩트 테이블에 복수의 디멘전 테이블을 결합하는 경우(스타스키마) : 보통 디멘전 테이블은 메모리에 들어갈 정도로 작음.
   + 따라서 처음에만 복사하면 팩트 테이블을 재배치할 필요가 없어서 테이블 결합이 훨씬 빨라짐.
-  + ❓ 스타 스키마(star schema/join schema) vs. 눈송이 스키마(snowflake schema)
-    * 데이터 웨어하우스 스키마 중 가장 단순한 종류의 스키마
-    * 한 개의 팩트 테이블과 pk 및 각 디멘전 테이블로 이루어진 스키마
+  + ❓ 스타 스키마(star schema/join schema) vs. 눈송이 스키마(snowflake schema) ([🔗](https://sunrise-min.tistory.com/entry/Star-schema%EC%99%80-Snowflake-schema-%EB%B9%84%EA%B5%90))
+    | |스타 스키마|눈송이 스키마|
+    |--|--|--|
+    |구조|![image](https://github.com/led156/TIL/assets/67251510/85359bb2-6cfe-461d-9432-be07d1d16f11)|![image](https://github.com/led156/TIL/assets/67251510/a58cc1c5-7a3e-4f1e-890c-c5eda97f4cf8)|
+    |설명|- 데이터 웨어하우스 스키마 중 가장 단순한 종류의 스키마</br>- 한 개의 팩트 테이블과 pk 및 각 디멘전 테이블로 이루어진 스키마|- 디멘전 테이블의 계층적 형태를 포함하는 일종의 스타 스키마</br>- 테이블을 추가 테이블로 분할하는 정규화를 사용→중복성을 줄이고 메모리 낭비 방지|
+    |특징|-디멘전 테이블에 중복 항목이 발생할 수 있음</br>-더 많은 공간(space)을 사용함.</br>- 단순한 관계가 있는 데이터마트에 적합|- 관리하기 쉽지만 설계와 이해가 복잡함</br>- 쿼리 실행시 더 많은 조인이 필요하므로 집계 효율이 떨어질 수 있음</br>- 데이터 웨어하우스에 적합|
 - 이를 위해서 분산 결합을 명시적으로 무효화하고, 쿼리 안의 SELECT 문으로 먼저 팩트 테이블을 지정하여 그것에 디멘전 테이블을 결합해야 함.
 
 ### 열 지향 스토리지 집계
-- 위 구조로 인해 presto에서 열 지향 스토리지의 집계를 매우 빨리 실해알 수 있음.
+- 위 구조로 인해 presto에서 열 지향 스토리지의 집계를 매우 빨리 실행할 수 있음.
   ```hive
   $ presto --catalog hive --schema default /*Hive 메타 스토어를 이용하는 presto 가동*/
   presto:default> SELECT status, count(*) cnt
