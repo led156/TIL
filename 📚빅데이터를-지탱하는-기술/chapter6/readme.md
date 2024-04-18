@@ -27,6 +27,23 @@ $ brew services start mongodb-community@7.0
 $ brew services stop mongodb-community@7.0
 ```
 
+> `error 15872`
+> - 오류 문구
+>   ```
+>   ❯ brew services start mongodb-community@7.0
+>   ==> Successfully started `mongodb-community` (label: homebrew.mxcl.mongodb-co
+>   ❯ brew services list
+>   Name              Status       User     File
+>   mongodb-community error  15872 eunbilee ~/Library/LaunchAgents/homebrew.mxcl.
+>   ```
+>   + start 오류는 없지만, 리스트를 보았을 때 에러 상태이고, DB 접근이 되지 않음.
+> - 해결 방법
+>   + 시도1 : file ownership 확인 `ls -lrt /tmp/mongodb-27017.sock` [🔗](https://www.mongodb.com/community/forums/t/unable-to-start-mongo-instance-on-mac-os-monterrey-12-6-using-homebrew/186682/2)
+>     * 결과 : 소유자는 내가 맞았음. 해결 X
+> - 문제 원인
+>   
+
+
 3. Twitter 스트리밍 API를 호출하는 스크립트
 ```
 
