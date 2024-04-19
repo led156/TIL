@@ -152,10 +152,18 @@ Welcome to
 
 Using Scala version 2.12.10 (OpenJDK 64-Bit Server VM, Java 11.0.23)
 ...
-❯ pyspark --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
+❯ pyspark --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.2,org.mongodb:mongodb-driver-sync:5.0.0,org.mongodb:mongodb-driver-core:5.0.0,org.mongodb:bson:5.0.0,org.mongodb:bson-record-codec:5.0.0
 [I 2024-04-18 18:15:04.186 LabApp] JupyterLab extension loaded from /opt/anaconda3/lib/python3.9/site-packages/jupyterlab
 [I 2024-04-18 18:15:04.187 LabApp] JupyterLab application directory is /opt/anaconda3/share/jupyter/lab
 ...
+```
+
+```
+org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
+org.mongodb:mongodb-driver-sync:5.0.0
+org.mongodb:mongodb-driver-core:5.0.0
+org.mongodb:bson:5.0.0
+org.mongodb:bson-record-codec:5.0.0
 ```
 - pyspark를 실행하면, 파이썬으로 대화식의 spark를 실행할 수 있음.
 
