@@ -2,11 +2,11 @@
 - JSON에 의한 스키마리스 데이터를 집계하는 절차에 대해 소개
   |역할|소프트웨어|
   |---|---|
-  |데이터 소스|Twitter 스트리밍 API|
-  |분산 스토리지|MongoDB 3.4.6|
+  |데이터 소스|Reddit API|
+  |분산 스토리지|MongoDB 5.0|
   |분산 데이터 처리|Apache Spark 2.2.0|
-  |데이터 정형|pandas 0.20.3|
-  |대화식 콘솔|주피터 Console 5.1.0|
+  |데이터 정형|pandas|
+  |대화식 콘솔|주피터 Console|
 
 ## 스키마리스 데이터 수집하기
 - 스트리밍 APIs를 이용해 데이터를 수집한 뒤, 샘플링된 데이터를 실시간으로 수집해 MongoDB에 보관한다.
@@ -134,6 +134,15 @@ for line in tqdm.tqdm(response.iter_lines(), unit='reddit', mininterval=10):
     * 그리고 brew install apache-spark.rb
 - pyspark 설치 [🔗](https://blog.voidmainvoid.net/347)
 - 환경변수 설정 [🔗](https://key4920.github.io/docs/bigdata_platform/ApacheSpark/spark_install/) [🔗](https://yjinaa.github.io/install-spark-on-m1/)
+- jars [🔗](https://stackoverflow.com/questions/51434808/spark-submit-packages-vs-jars)
+  ```
+  org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
+  org.mongodb:mongodb-driver-sync:5.0.0
+  org.mongodb:mongodb-driver-core:5.0.0
+  org.mongodb:bson:5.0.0
+  org.mongodb:bson-record-codec:5.0.0
+  ```
+
 ```
 ❯ brew install apache-spark.rb
 ❯ vi .bash_profile # 또는 vi ~/.zshrc
@@ -158,13 +167,6 @@ Using Scala version 2.12.10 (OpenJDK 64-Bit Server VM, Java 11.0.23)
 ...
 ```
 
-```
-org.mongodb.spark:mongo-spark-connector_2.12:10.2.2
-org.mongodb:mongodb-driver-sync:5.0.0
-org.mongodb:mongodb-driver-core:5.0.0
-org.mongodb:bson:5.0.0
-org.mongodb:bson-record-codec:5.0.0
-```
 - pyspark를 실행하면, 파이썬으로 대화식의 spark를 실행할 수 있음.
 
 ```
@@ -172,9 +174,25 @@ org.mongodb:bson-record-codec:5.0.0
 ```
 
 
-# 6.2.
+# 6.2. Hadoop에 의한 데이터 파이프라인
+- Hive, Presto를 사용한 배치형의 데이터 처리. 매일매일의 데이터 처리 (ETL 프로세스-데이터 마트 작성: 데이터 파이프라인)
+  |역할|소프트웨어|
+  |---|---|
+  |벌크 형 데이터 전송|Embulk|
+  |분산 시스템|Hadoop|
+  |데이터 구조화|Hive|
+  |쿼리 엔진|Presto|
 
 
-# 6.3.
+
+# 6.3. 워크플로 관리 도구에 의한 자동화
+- 데이터 파이프라인을 자동화하기 위해, 오류 발생 시의 복구를 염두에 두고 워크플로를 설계
+  |역할|소프트웨어|
+  |---|---|
+  |워크플로 관리|Apache Airflow|
+
+
+
+# 6.4. 클라우드 서비스에 의한 데이터 파이프라인
 
 
