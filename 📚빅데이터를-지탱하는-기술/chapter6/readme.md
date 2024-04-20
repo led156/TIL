@@ -127,6 +127,7 @@ for line in tqdm.tqdm(response.iter_lines(), unit='reddit', mininterval=10):
 - Tweet 실시간 스트리밍 api가 유료화되어, 캐글에 있는 트위터 데이터 사용 [🔗](https://www.kaggle.com/datasets/gpreda/covid19-tweets)
 - [코드 : ] ()
 
+
 4. 대화식 실행 환경의 준비 및 Spark 설치
 
 - apache spark 설치 [🔗]()
@@ -172,11 +173,60 @@ Using Scala version 2.12.10 (OpenJDK 64-Bit Server VM, Java 11.0.23)
 ```
 
 - pyspark를 실행하면, 파이썬으로 대화식의 spark를 실행할 수 있음.
+  ```python
+  import pandas as pd
 
-```
+  try:
+      client = pymongo.MongoClient(#"someInvalidURIOrNonExistantHost",
+                                       serverSelectionTimeoutMS=3000)
+      client.server_info() # force connection on a request as the
+                           # connect=True parameter of MongoClient seems
+                           # to be useless here 
+      print(client.tweets.sample.find_one())
+      
+      reddit_sample_data = pd.DataFrame(list(client.tweets.sample.find(limit=5)))
+      display(reddit_sample_data.head())
+  except pymongo.errors.ServerSelectionTimeoutError as err:
+      # do whatever you need
+      print(err)
+  ```
 
-```
-
+5. Spark에 의한 분산 환경
+- 데이터 프레임을 일시적인 뷰로 등록하고, 데이터 프레임을 SQL로 집계 (열 지향 스토리지처럼 칼럼 단위 읽기에 최적화되어 있지 않으므로 고속 집계를 위한 데이터 추출이 필요)
+  ```python
+  from pyspark.sql import SparkSession
+  
+  spark = SparkSession \
+      .builder.master("myApp") \
+      .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer") \
+      .config("spark.mongodb.read.connection.uri", "mongodb://127.0.0.1:27017/tweets.sample") \
+      .config("spark.mongodb.write.connection.uri", "mongodb://127.0.0.1:27017/tweets.sample") \
+      .config("spark.driver.bindAddress", "127.0.0.1") \
+      .config('spark.jars.packages', 'org.mongodb.spark:mongo-spark-connector_2.12:10.2.2') \
+      .getOrCreate()
+  
+  df = spark.read.format('mongodb')\
+      .option("spark.mongodb.read.database", "tweets") \
+      .option("spark.mongodb.read.collection", "sample") \
+      .load()
+  
+  df.createOrReplaceTempView('tweets')
+  
+  query = '''
+      select *
+      from (
+      select source, count(*) cnt
+      from tweets
+      group by source)
+      order by cnt desc
+  '''
+  
+  spark.sql(query).show(5)
+  ```
+- 텍스트 데이터의 가공 (데이터 처리)
+  ```
+  
+  ```
 
 # 6.2. Hadoop에 의한 데이터 파이프라인
 - Hive, Presto를 사용한 배치형의 데이터 처리. 매일매일의 데이터 처리 (ETL 프로세스-데이터 마트 작성: 데이터 파이프라인)
