@@ -78,7 +78,7 @@ $ brew services stop mongodb-community@7.0
     ```
 
 
-3. Reddit 스트리밍 API를 호출해 MongoDB에 저장하는 스크립트 [🔗 ](https://seungyeup.github.io/posts/big-data-chapt6/)
+3-1. (Tweet)Reddit 스트리밍 API를 호출해 MongoDB에 저장하는 스크립트 [🔗 ](https://seungyeup.github.io/posts/big-data-chapt6/)
 ```
 # reddit api docs : https://www.reddit.com/dev/api
 
@@ -122,6 +122,10 @@ for line in tqdm.tqdm(response.iter_lines(), unit='reddit', mininterval=10):
         reddit['_timestamp'] = datetime.datetime.utcnow().isoformat()
         mongo.reddit.sample.insert_one(reddit)
 ```
+
+3-2. Tweet 데이터를 MongoDB에 저장하는 스크립트
+- Tweet 실시간 스트리밍 api가 유료화되어, 캐글에 있는 트위터 데이터 사용 [🔗](https://www.kaggle.com/datasets/gpreda/covid19-tweets)
+- [코드 : ] ()
 
 4. 대화식 실행 환경의 준비 및 Spark 설치
 
