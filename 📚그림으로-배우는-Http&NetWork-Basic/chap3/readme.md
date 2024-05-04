@@ -29,8 +29,8 @@
 
 
 # 멀티파트
-[멀티파트(Multipart)란? Multipart 전송과 MultipartResolver 를 통한 요청 처리](https://sharonprogress.tistory.com/197)
-[파일 업다운로드 기본설정, 멀티파트 미디어 타입](https://yoonho-devlog.tistory.com/36)
+- [멀티파트(Multipart)란? Multipart 전송과 MultipartResolver 를 통한 요청 처리](https://sharonprogress.tistory.com/197)
+- [파일 업다운로드 기본설정, 멀티파트 미디어 타입](https://yoonho-devlog.tistory.com/36)
 
 
 # 레인지 리퀘스트
