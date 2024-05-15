@@ -5,7 +5,7 @@
 ##### 기법을 쓰는 이유
 
 > 다중 프로그래밍 시스템에 여러 프로세스를 수용하기 위해 주기억장치를 동적 분할하는 메모리 관리 작업이 필요해서
-
+[메모리 단편화, 페이징, 세그멘테이션](https://velog.io/@nnnyeong/OS-%EB%A9%94%EB%AA%A8%EB%A6%AC-%EB%8B%A8%ED%8E%B8%ED%99%94-%ED%8E%98%EC%9D%B4%EC%A7%95-%EC%84%B8%EA%B7%B8%EB%A9%98%ED%85%8C%EC%9D%B4%EC%85%98#segmentation)
 <br>
 
 #### 메모리 관리 기법
