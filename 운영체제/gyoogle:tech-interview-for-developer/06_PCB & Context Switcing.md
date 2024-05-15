@@ -3,7 +3,7 @@
 <br>
 
 #### Process Management
-
+[PCB와 Context Switching](https://m.blog.naver.com/adamdoha/222019884898)
 > CPU가 프로세스가 여러개일 때, CPU 스케줄링을 통해 관리하는 것을 말함
 
 이때, CPU는 각 프로세스들이 누군지 알아야 관리가 가능함
