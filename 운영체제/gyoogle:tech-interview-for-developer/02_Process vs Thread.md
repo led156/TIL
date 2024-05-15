@@ -23,7 +23,7 @@
   - 초기화 되지 않은 데이터는 bss 영역에 저장
 - Heap : 동적 할당 시 사용 (new(), malloc() 등)
 
-- Stack : 지역변수, 매개변수, 리턴 값 (임시 메모리 영역)
+- Stack : 지역변수, 매개변수, 리턴 값 (임시 메모리 영역) [프로세스 메모리 구조 에서의 스택(Stack) 이란?](https://resilient-923.tistory.com/362) [프로세스 주소공간 / Stack에 높은 주소부터 할당하는 이유](https://velog.io/@manx/OS-%ED%94%84%EB%A1%9C%EC%84%B8%EC%8A%A4-%EC%A3%BC%EC%86%8C%EA%B3%B5%EA%B0%84)
 
 <br>
 
