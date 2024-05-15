@@ -149,5 +149,6 @@ int main(int argc, char *argv[]) {
 exec가 실행되면, 
 
 execvp( 실행 파일, 전달 인자 ) 함수는, code segment 영역에 실행 파일의 코드를 읽어와서 덮어 씌운다.
+[C언어 main() 함수의 명령 인수 (argc, argv)](https://blog.naver.com/sharonichoya/220501242693)
 
 씌운 이후에는,  heap, stack, 다른 메모리 영역이 초기화되고, OS는 그냥 실행한다. 즉, 새로운 Process를 생성하지 않고, 현재 프로그램에 wc라는 파일을 실행한다. 그로인해서, execvp() 이후의 부분은 실행되지 않는다.
