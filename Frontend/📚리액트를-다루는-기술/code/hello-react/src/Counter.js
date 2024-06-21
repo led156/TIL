@@ -4,14 +4,16 @@ class Counter extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            number: 0
+            number: 0,
+            fixedNumber: 0
         };
     }
     render() {
-        const { number } = this.state; // state 를 조회 할 때에는 this.state 로 조회합니다.
+        const { number, fixedNumber } = this.state; // state 를 조회 할 때에는 this.state 로 조회합니다.
         return (
             <div>
                 <h1>{number}</h1>
+                <h1>바뀌지 않음 : {fixedNumber}</h1>
                 <button
                 // onClick 을 통하여 버튼이 클릭됐을 때 호출 할 함수를 지정합니다.
                 onClick={() => {
