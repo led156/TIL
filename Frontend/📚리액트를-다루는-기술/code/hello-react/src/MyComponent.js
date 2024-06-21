@@ -1,9 +1,13 @@
-const MyComponent = (props) => {
+const MyComponent = ({ name, children }) => {
+
+    /* const { name, children } = props; */
+
     return (
-    <div>나의 새롭고 멋진 {props.name} <br />
-    chileren 값은 {props.children} 입니다.
-    </div>)
-    ;
+        <div>
+            나의 새롭고 멋진 {name} <br />
+            chileren 값은 {children} 입니다.
+        </div>
+    );
 };
 
 /* props 기본값 설정 */
