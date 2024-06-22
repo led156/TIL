@@ -187,16 +187,231 @@ class EventPractice extends Component {
 ```
 
 ## 4.2.4. input 여러 개 다루기
+- input이 여러 개일 때 state에 넣는 방법
+  + 메서드를 여러 개 만들거나
+  + event 객체를 활용한다.
+```js
+import { Component } from "react";
+
+class EventPractice extends Component {
+    state = {
+        username: '',
+        message: ''
+    }
+
+    handleChange = (e) => {
+        this.setState({
+            [e.target.name]: e.target.value
+        });
+    }
+
+    handleClick = () => {
+        alert(this.state.username + ': ' + this.state.message);
+        this.setState({
+            username: '',
+            message: ''
+        });
+    }
+
+
+    render() {
+        return (
+            <div>
+                <h1>이벤트 연습</h1>
+
+                <input
+                    type="text"
+                    name="username"
+                    placeholder="사용자명"
+                    value={this.state.username}
+                    onChange={
+                        this.handleChange
+                    }
+                ></input>
+                <input
+                    type="text"
+                    name="message"
+                    placeholder="아무거나 입력해 보세요"
+                    value={this.state.message}
+                    onChange={
+                        this.handleChange
+                    }
+                ></input>
+
+                <button onClick={
+                    this.handleClick
+                }>확인</button>
+            </div>
+        );
+    }
+}
+
+export default EventPractice;
+```
+- `e.target` : 해당 인풋을 가리킴.
+  + `[e.target.name]` : 객체 안에서 key를 [ ]로 감싸면 그 안에 넣은 레퍼런스가 가리키는 실제 값이 key 값으로 사용됨. 해당 인풋의 name을 가리킴
+  + `e.target.value` : 해당 인풋의 value을 가리킴
+
 
 
 ## 4.2.5. onKeyPress 이벤트 핸들링하기
+- 키를 눌렀을 때 발생하는 KeyPress 이벤트를 처리하는 방법 알아보기
+```js
+...
+import { Component } from "react";
+
+class EventPractice extends Component {
+    ...
+
+    handleKeyPress = (e) => {
+        if(e.key === 'Enter') {
+            this.handleClick();
+        }
+    }
 
 
+    render() {
+        return (
+            ...
+                <input
+                    type="text"
+                    name="message"
+                    placeholder="아무거나 입력해 보세요"
+                    value={this.state.message}
+                    onChange={
+                        this.handleChange
+                    }
+                    onKeyPress={this.handleKeyPress}
+                ></input>
+            ...
+        );
+    }
+}
+
+export default EventPractice;
+```
 
 
 # 4.3. 함수 컴포넌트로 구현해 보기
+```js
+import { useState } from "react";
+
+const EventPractice = () => {
+    const [username, setUsername] = useState('');
+    const [message, setMessage] = useState('');
 
 
+    const onChangeUsername = e => setUsername(e.target.value);
+    const onChangeMessage = e => setMessage(e.target.value);
+    const onClick = () => {
+        alert(username + ': ' + message);
+        setUsername('');
+        setMessage('');
+    };
+    const onKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            onClick();
+        }
+    };
+    
+
+    return (
+        <div>
+            <h1>이벤트 연습</h1>
+
+            <input
+                type="text"
+                name="username"
+                placeholder="사용자명"
+                value={username}
+                onChange={onChangeUsername}
+            />
+            <input
+                type="text"
+                name="message"
+                placeholder="아무거나 입력해 보세요"
+                value={message}
+                onChange={onChangeMessage}
+                onKeyPress={onKeyPress}
+            />
+
+            <button onClick={onClick}>확인</button>
+
+
+        </div>
+    );
+
+
+
+};
+
+export default EventPractice;
+```
+- 추가로 인풋 개수가 많아지는 경우를 대비해 `e.target.name`을 활용할 수 있음. (useState를 통해 객체를 넣기)
+```js
+import { useState } from "react";
+
+const EventPractice = () => {
+    const [form, setForm] = useState({
+        username: '',
+        message: ''
+    });
+    const { username, message } = form;
+
+
+    const onChange = e => {
+        const nextForm = {
+            ...form,
+            [e.target.name]: e.target.value
+        };
+        setForm(nextForm);
+    }
+    const onClick = () => {
+        alert(username + ': ' + message);
+        setForm({
+            username: '',
+            message: ''
+        })
+    };
+    const onKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            onClick();
+        }
+    };
+    
+
+    return (
+        <div>
+            <h1>이벤트 연습</h1>
+
+            <input
+                type="text"
+                name="username"
+                placeholder="사용자명"
+                value={username}
+                onChange={onChange}
+            />
+            <input
+                type="text"
+                name="message"
+                placeholder="아무거나 입력해 보세요"
+                value={message}
+                onChange={onChange}
+                onKeyPress={onKeyPress}
+            />
+
+            <button onClick={onClick}>확인</button>
+
+
+        </div>
+    );
+
+
+
+};
+
+export default EventPractice;
+```
 
 # 4.4. 정리
 
