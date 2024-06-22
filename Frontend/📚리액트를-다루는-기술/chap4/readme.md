@@ -102,8 +102,89 @@ export default EventPractice;
 
 ## 4.2.3. 임의 메서드 만들기
 - 함수 형태의 값을 전달하기 때문에 이벤트를 처리할 때 렌더링을 하는 동시에 함수를 만들어서 전달해주는 형태임.
-- 이 방법 대신 함수를 미리 준비하여 전달하는 방법도 있음. (성능 차이는 없지만, 가독성을 훨씬 높음)
+- 이 방법 대신 _함수를 미리 준비하여 전달하는 방법_도 있음. (성능 차이는 없지만, 가독성을 훨씬 높음)
 
+### 4.2.3.1. 기본 방식
+```js
+import { Component } from "react";
+
+class EventPractice extends Component {
+    state = {
+        message: ''
+    }
+    
+    constructor(props) {
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+        this.handleClick = this.handelClikc.bind(this);
+    }
+
+    handleChange(e) {
+        this.setState({
+            message: e.target.value
+        });
+    }
+
+    handelClick(e) {
+        alert(this.state.message);
+        this.setState({
+            message: ''
+        });
+    }
+
+
+    render() {
+        return (
+            <div>
+                <h1>이벤트 연습</h1>
+                <input
+                    type="text"
+                    name="message"
+                    placeholder="아무거나 입력해 보세요"
+                    value={this.state.message}
+                    onChange={
+                        this.handleChange
+                    }
+                ></input>
+
+                <button onClick={
+                    this.handelClick
+                }>확인</button>
+            </div>
+        );
+    }
+}
+
+export default EventPractice;
+```
+- `this.handleChange = this.handleChange.bind(this); ...` : 함수가 호출될 때 this는 호출부에 따라 결정됨 → 클래스의 임의 메서드가 특정 HTML 요소의 이벤트로 등록되는 과정에서 메서드와 this의 관계가 끊어져 버림. ⭐️
+  + 따라서 컴포넌트 자신으로 제대로 가리키기 위해서 메서드를 this와 바인딩하는 작업이 필요함. (하지 않으면 this가 undefined를 가리키게 됨)
+
+### 4.2.3.2. Property Initializer Syntax를 사용한 메서드 작성
+- 메서드 바인딩 : 생성자 메서드에서 하는 것이 정석.
+  + 다만 새 메서드를 만들 때마다 constuctor도 수정해야 하기 때문에 불편할 수 있음.
+  + 따라서 바벨의 transform-class-properties 문법을 사용해 화살표 함수 형태로 메서드를 정의함. [🔗](https://1995-dev.tistory.com/71)
+ 
+```js
+class EventPractice extends Component {
+    state = {
+        message: ''
+    }
+
+    handleChange = (e) => {
+        this.setState({
+            message: e.target.value
+        });
+    }
+
+    handleClick = () => {
+        alert(this.state.message);
+        this.setState({
+            message: ''
+        });
+    }
+...
+```
 
 ## 4.2.4. input 여러 개 다루기
 
