@@ -8,7 +8,7 @@ class EventPractice extends Component {
     constructor(props) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
-        this.handleClick = this.handelClick.bind(this);
+        this.handleClick = this.handleClick.bind(this);
     }
 
     handleChange(e) {
@@ -17,7 +17,7 @@ class EventPractice extends Component {
         });
     }
 
-    handelClick(e) {
+    handleClick(e) {
         alert(this.state.message);
         this.setState({
             message: ''
@@ -40,7 +40,7 @@ class EventPractice extends Component {
                 ></input>
 
                 <button onClick={
-                    this.handelClick
+                    this.handleClick
                 }>확인</button>
             </div>
         );
