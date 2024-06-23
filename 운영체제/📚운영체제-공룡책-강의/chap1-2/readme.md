@@ -1,4 +1,9 @@
-<img width="406" alt="image" src="https://github.com/led156/TIL/assets/67251510/16d605b2-a540-4a40-a758-68d32b26eb76"># 01. 운영체제가 뭐길래?
+# ✏️ 주요 개념
+- 운영체제와 커널이란
+- 
+
+
+# 01. 운영체제가 뭐길래?
 
 ## 개념
 - 운영체제 : a software that operates a computer system.
@@ -15,6 +20,15 @@
 - 뺄셈 : 2의 보수 표현법
 - 곱셈과 나눗셈 : 덧셈과 뺄셈의 반복
 - 실수 연산 : 부동 소수점 표현법
+  <details>
+    <summary>❓부동 소수점</summary>
+  
+  - 부동 소수점(floating point) : 소수점이 떠 다닌다는 의미.
+    + 유효숫자를 사용한 곱셈 형태로 표현됨. [부호] x [가수] x [밑수]^[지수] (예시 : + 12.345 x 10^1). 지수의 값을 변경하게 되면 소수점 자리가 바뀌므로 이것이 마치 떠다니는 것처럼 보이게 됨.
+    + 2진수 표현에서 정규화 과정을 거치면 가수부는 언제나 1로 시작하는 수가 되기 때문에 첫번째 자리는 생략 가능하며, 더 많은 수를 표현할 수 있게 됨. [🔗자세한 설명](https://devocean.sk.com/blog/techBoardDetail.do?ID=165270&boardType=techBlog)
+  - 고정 소수점 : 소수점을 기준으로 정수부와 소수부로 표현됨.
+  
+  </details>
 - 함수 : GOTO
   + 삼각함수, 미분, 적분, 사진 촬영, ....
 
@@ -103,6 +117,20 @@
 - 멀티 프로그래밍이 된다면, time-sharing(시분할)로 CPU를 스위칭하면서 유저는 여러 개의 job과 interact 할 수 있게 됨.
 - CPU scheduling : If several processes are ready to run at the same time, the system must choose which process will run next
   + 여러 개의 프로세스가 동시에 ready 상태에 있을 때, 시스템은 다음에 run할 프로세스를 선택해야 함. (cpu 효율을 보장하는)
+<details>
+    <summary>❓Concurrency(동시성) vs. Parallelism(병렬성)</summary>
+
+- [🔗](https://spacebike.tistory.com/22)
+  
+|Concurrency (동시성)|Parallelism (병렬성)|
+|--|--|
+|동시에 실행되는 것처럼 보이는 것|실제로 동시에 실행되는 것|
+|논리적인 개념|물리적인 개념|
+|싱글코어, 멀티코어에서 가능|멀티코어에서만 가능|
+|![image](https://github.com/led156/TIL/assets/67251510/65884d42-b9e9-4dd3-bc63-342ed0a876b0)|![image](https://github.com/led156/TIL/assets/67251510/a6addefd-7139-46e4-bb10-a01ab00d7d30)|
+|태스크가 동시에 수행되므로 동기화 문제가 발생할 수 있음.|여러 작업을 동시에 수행하여 race condition 혹은 동기화 문제가 발생할 수 있음.|
+
+</details>
  
 ### opretation mode
 - user mode & kernel mode
@@ -125,6 +153,13 @@
   + Real-Time Embedded Systems
   + <img width="683" alt="image" src="https://github.com/led156/TIL/assets/67251510/302986f3-b208-4c27-8fca-e299d9d0bc98">
   + <img width="406" alt="image" src="https://github.com/led156/TIL/assets/67251510/3335a654-f2f9-41bd-839f-8b98eb372664">
+
+<details>
+    <summary>❓가상화 vs. 클라우드</summary>
+
+
+
+</details>
 
 
 # Chap2. O/S structures
