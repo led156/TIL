@@ -1,3 +1,8 @@
+# ✏️ 
+- 프로세스의 개념
+
+---
+
 # Chapter3. Processes
 
 # 프로세스의 이해
@@ -123,6 +128,207 @@ int main()
 
 
 # 프로세스의 생성
+# 3.3. Operations on Processes
+- 새로운 프로세스는 `fork()`라는 시스템 콜에 의해 생성됨.
+  + 부모 프로세스의 주소공간을 복사해서 구성됨.
+  + parent process : `fork()` return zero
+  + child process : `fork()` return nonzero pid
++ 예제
+  - ```c
+    #include <stdio.h>
+    #include <unistd.h>
+    int main()
+    {
+      pid_t pid;
+      pid = fork();
+      printf("Hello, Process! %d\n", pid);
+    }
+    ```
+  - 출력결과
+    ```
+    Hello, Process! 2547
+    Hello, Process! 0
+    ```
+
+- child process의 Run을 기다릴 수 있음 : `wait()`
+  + 부모 프로세스는 ready queue에서 대기하게 됨.
+  + 예제
+    * ```c
+      #include <stdio.h>
+      #include <unistd.h>
+      #include <wait.h>
+      int main()
+      {
+        pid_t pid;
+        pid = fork();
+        if (pid > 0)
+        wait(NULL);
+        printf("Hello, Process! %d\n", pid);
+      }
+      ```
+  + 출력 결과
+    * ```
+      Hello, Process! 0
+      Hello, Process! 2547
+      ```
+
+- Exercise 3.1
+  + ```c
+    int value = 5;
+
+    int main()
+    {
+      pid_t pid;
+      pid = fork();
+
+      if (pid == 0) { // child process
+        value += 15;
+        return 0;
+      }
+      else if (pid > 0) { // parent process
+        wait(NULL);
+        printf("Parent: value = %d\n", value);
+      }
+    }
+    ```
+  + ```
+    Parent: value = 5
+    ```
+  + 부모-자식 프로세스의 경우 코드, 데이터, 스택, 힙 영역 모두 따로 가지게 됨! (스레드와 달리)
+  + ![image](https://github.com/led156/TIL/assets/67251510/6cd71554-c2b9-4e9f-877c-bb717bd2d231)
+  + ![image](https://github.com/led156/TIL/assets/67251510/db252dc5-5541-43b0-b3c7-2b7bfc9eb205)
+
+
+- Exercise 3.2
+  + ```c
+    #include <stdio.h>
+    #include <unistd.h>
+    #include <wait.h>
+    /** How many processes are created? */
+    int main() {
+      fork(); // fork a child process
+      fork(); // fork another child process
+      fork(); // and fork another
+      return 0;
+    }
+    ```
+  + ![image](https://github.com/led156/TIL/assets/67251510/9167f108-443c-430a-8635-e039592985dc)
+
+
+- Exercise 3.11
+  + ```c
+    #include <stdio.h>
+    #include <unistd.h>
+    /** How many processes are created? */
+    int main() {
+      int i;
+      for (i = 0; i < 4; ++i)
+        fork();
+      return 0;
+    }
+    ```
+  + ![image](https://github.com/led156/TIL/assets/67251510/5b9b4236-99be-4521-a3dc-5f71c3edd7ce)
+
+
+- Exercise 3.11
+  + ```c
+    int main()
+    {
+      pid_t pid;
+      pid = fork();
+
+      if (pid == 0) {  // child process
+        execlp("/bin/ls", "ls", NULL);
+        printf("LINE J\n");
+      }
+      else if (pid > 0) { // parent process
+        wait(NULL);
+        printf("Child Complete\n");
+      }
+    
+      return 0;
+    }
+    ```
+  + `int execlp( const char *file, const char *arg, ...)` : 지정 디렉토리에 있는, 프로그램을 실행하는 것. 따라서 해당 명령어 뒤에 있는 명령어들은 작동X
+  + ```
+    Child Complete
+    ```
+
+
+- Exercise 3.13
+  + ```c
+    int main()
+    {
+      pid_t pid, pid1;
+      pid = fork();
+
+      if (pid == 0) {
+        pid1 = getpid();
+        printf("CHILD: pid = %d \n", pid); 
+        printf("CHILD: pid1 = %d \n", pid1); // 생성된 자식 프로세스 pid
+      }
+      else if (pid > 0) {
+        wait(NULL);
+        pid1 = getpid();
+        printf("PARENT: pid = %d \n", pid); // 생성한 자식 프로세스 pid
+        printf("PARENT: pid1 = %d \n", pid1); // 본인 pid
+      }
+      
+      return 0;
+    }
+    ```
+  + `getpid()` : 본인 pid 반환
+  + ```
+    CHILD: pid = 0
+    CHILD: pid1 = 5157
+    PARENT: pid = 5157
+    PARENT: pid1 = 5156
+    ```
+
+
+
+- Exercise 3.16
+  + ```c
+    #define SIZE 5
+    int nums[SIZE] = {0, 1, 2, 3, 4};
+
+    int main()
+    {
+      pid_t pid;
+      int i;
+      pid = fork();
+
+      if (pid == 0) {
+        for (i = 0; i < SIZE; ++i) {
+          nums[i] *= i;
+          printf("CHILD: %d \n", nums[i]);
+        }
+      }
+      else if (pid > 0) {
+        wait(NULL);
+        for (i = 0; i < SIZE; ++i) {
+          printf("PARENT: %d \n", nums[i]);
+        }
+      }
+      
+      return 0;
+    }
+    ```
+  + ```
+    CHILD: 0
+    CHILD: 1
+    CHILD: 4
+    CHILD: 9
+    CHILD: 16
+    PARENT: 0
+    PARENT: 1
+    PARENT: 2
+    PARENT: 3
+    PARENT: 4
+    ```
+
+- 자식 프로세스를 생성한 이후 명령어를 항상 부모 프로세스가 먼저 실행한다는 보장이 없음. (syncronazation)
+
 
 
 # 프로세스간 통신
