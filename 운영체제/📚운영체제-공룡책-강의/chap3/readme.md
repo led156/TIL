@@ -1,5 +1,9 @@
-# ✏️ 
-- 프로세스의 개념
+# ✏️ 주요 개념
+1. 파트1 
+  - 프로세스의 개념 (PCB, 프로세스 스케줄링, 문맥 교환)
+  - 프로세스 생성 (부모자식)
+2. 파트2
+  - ...
 
 ---
 
@@ -87,6 +91,19 @@
 - parent - child `fork()`
 - ![image](https://github.com/led156/TIL/assets/67251510/e4415621-85e9-4131-9fd8-006934912fea)
 - execution : 실행할 때 concurrently하게 실행되거나 자식 프로세스가 멈추길 waits 할 수도 있음.
+  + <details>
+    <summary> ❓ wait이 호출될 때 어떤 일이 발생할까 </summary>
+    
+    [SIGCHLD와 wait() 함수 사용](https://blog.naver.com/nds239/10131452097)
+    [프로세스 생성과 종료 총정리 및 wait 시스템콜 상세](https://bannavi.tistory.com/69)
+    ![image](https://github.com/led156/TIL/assets/67251510/f03f1e59-57a7-4579-a306-e0f5f406d0fe)
+    - SIGCHLD : 자식 프로세스의 상태가 바뀌면 발생하는 시그널
+      + 자식 프로세스가 종료하면 부모 프로세스에게 SIGCHLD 시그널을 보내게 됨.
+        * 자식 프로세스가 종료될 때 status 정보를 넣어줘서 exit() 함수를 실행함.
+      + 부모 프로세스가 해당 시그널을 받고, wait을 종료함.
+    - 부모 프로세스가 자식 프로세스 여러 개를 기다리는 상태일 때 
+    
+    </details>
 - address-space : 부모 프로세스를 (PCB만 다르게) duplicate하거나 새로운 new program을 가질 수도 있음.
 
 ```c
@@ -329,7 +346,13 @@ int main()
 
 - 자식 프로세스를 생성한 이후 명령어를 항상 부모 프로세스가 먼저 실행한다는 보장이 없음. (syncronazation)
 
+---
+# 🙋
+- 좀비 프로세스 / 고아 프로세스의 문제점 및 해결방법
 
+
+---
+# ✏️ 주요 개념
 
 # 프로세스간 통신
 
