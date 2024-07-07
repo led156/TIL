@@ -373,10 +373,341 @@ int main()
 
 # ✏️ 주요 개념
 
+
 # 프로세스간 통신
+# 3.4. Interprocess Communication
+- 프로세스는 concurrently하게 실행
+  + 1. independent processes
+    * 다른 프로세스와 공유하는 데이터가 없는 상태
+  + 2. cooperating processes
+    * 두 개의 프로세스가 서로 영향을 주고받으며 실행되는 상태
+    * 데이터를 공유하거나 메시지를 주고 받을 때
+
+## IPC : Inter-Process Communication
+- IPC : 프로세스가 cooperating하기 위해 필요한 메커니즘.
+  + 데이터를 교환함 (send / receive)
+- ![image](https://github.com/led156/TIL/assets/67251510/b00cd4cd-bf03-47da-ada3-392c5a1df18f)
+- 1. shared memory
+- 2. message passing
+
+
+# 3.5. IPC in Shared-Memory Systems
+- Producer-Consumer Problem
+  + producer(생산자)는 정보를 생산하고, consumer(소비자)는 정보를 소비함.
+  + 예시1) 컴파일러는 (어셈블리 코드) 생산자, 어셈블러는 소비자
+  + 예시2) 웹서버는 (HTML file) 생산자, 브라우저는 소비자
+
+- shared-memory를 사용하면, 생산자/소비자를 concurrently하게 실행할 수 있음. → buffer를 공유.
+  + producer : buffer를 채운다.
+  + consumer : buffer를 비게 한다.
+- 프로세스들의 메모리 영역은 각각 생성되는데? 따라서 shared memory라는 다른 메모리 영역을 운영체제가 관리하고 있어야 함.
+
+- Define a shared buffer
+  + ```c
+    #define BUFFER_SIZE 10
+
+    typedef struct {
+      ...
+    } item
+  
+    item buffer[BUFFER_SIZE];
+    int in = 0;
+    int out = 0;
+    ```
+  + <img width="335" alt="image" src="https://github.com/led156/TIL/assets/67251510/d3278757-0b4d-4928-92cd-807e936f14ab">
+
+  
+  + ```c
+    item next_produced;
+  
+    while (true) {
+      /* produce an item in next_produced */
+  
+      while (((in + 1) % BUFFER_SIZE) == out);
+  
+      buffer[in] = next_produced;
+      in = (in + 1) % BUFFER_SIZE;
+    }
+    ```
+
+  + ```c
+    item next_consumed;
+  
+    while (true) {
+      while (in == out);
+  
+      next_consumed = buffer[out];
+      out = (out + 1) % BUFFER_SIZE;
+  
+      /* consume the item in next_consumed */
+    }
+    ```
+
+- 다만, shared memory를 생성하는 것은 구현이 복잡해짐.
+  + shared memory를 조작하는데 필요한 동작을 모두 프로그래머가 작성해야하기 때문에!
+
+# 3.6. IPC in Message-Passing Systems
+- Message-Passing
+  + 운영체제가 알아서 목적지까지 전달해줌.
+  + 두 개의 prosumer가 있을 때 shared memory 방식으로 구현하기 어렵지만, message passing으로는 쉽게 적용할 수 있음.
+- send message - receive message
+  + ```c
+    message next_produced;
+
+    while (true) {
+      /* produce an item in next_produced */
+
+      send(next_produced);
+    }
+    ```
+  + ```c
+    message next_consumed;
+
+    while (true) {
+      receive(next_consumed);
+
+      /* consume the item in next_consumed */
+    }
+    ```
+- Communication Links
+  + 두 개의 프로세스 P, Q가 communicate 하고자 할 때, 메시지를 send 하거나 receive 하는 기능만 있으면 됨.
+  + implemented(구현) 방식
+    * direct / indirect communication
+      + 부모님이 자식에게 용돈을 손으로 줌 / 부모님이 자식에게 줄 용돈을 탁자에 올려둠
+      + direct communication : 통신의 수신자 또는 발신자의 이름을 명시적으로 지정해야 합니다. & communication 링크가 automatic하게 생성되어 하나의 링크만 설정됨
+        - send(𝑃, message) – send a message to process 𝑃.
+        - receive(𝑄, message) – receive a message from process 𝑄.
+      + indirect communication : mailbox, port에 메시지를 보내거나 받음. & 두 개의 프로세스가 한 Port를 사용할 때 링크가 생성됨. 여러 개의 관계가 생길 수 있음
+        - 메시지를 배치할 수 있는 위치 send(𝐴, message) – send a message to mailbox 𝐴
+        - 메시지를 제거할 수 있는 위치 receive(𝐴, message) – receive a message from mailbox 𝐴.
+        - 운영체제의 입장에서 제공할 것 :
+          + Create a new mailbox.
+          + Send and Receive message through the mailbox
+          + Delete a mailbox
+    
+    * synchronous / asynchronous communication
+      + 부모님이 자식의 잔고를 확인하고 용돈을 줌 / 부모님이 자식의 잔고와 상관없이 용돈을 줌
+    * automatic / explicit buffering
+      
+    
+  + design options for implementation
+    * blocking / non-blocking : synchronous / asynchoronous
+      + blocking이면, 전송이 끝날 때까지 기다리거나 해야함. 즉 동기화가 되어있는 것임.
+    * Blocking send : 메시지가 수신될 때까지 sender가 차단됨
+    * Non-blocking send : sender가 메시지를 계속 보냄
+    * Blocking receive : 메시지를 사용할 수 있을 때까지 receiver가 차단됨
+    * Non-blocking recevie : receiver가 유효한 메시지나 null 메시지를 검색함
+
 
 
 # 프로세스간 통신의 실제
+# 3.7. Examples of IPC Systems
+
+- Examples of IPC Systems
+  + Shared Memory : POSIX Shared Memory
+    * POSIX : Portable Operating System Interface (for uniX)
+  + Message Passing : Pipes
+    * UNIX system 초기 IPC 메커니즘
+
+
+## 3.7.1 POSIX Shared Memory
+- memory-mapped 파일을 사용할 수 있음.
+  1. create a shared-memory object : `fd = shm_open(name, O_CREAT | ORDWR, 0666);`
+  2. configure the size of the object in bytes : `ftruncate(fd, 4096);`
+  3. establish a memory-mapped file : `mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);`
+
+- ```c
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <string.h>
+  #include <fcntl.h>
+  #include <sys/shm.h>
+  #include <sys/stat.h>
+  #include <sys/mman.h>
+
+  int main()
+  {
+    const int SIZE = 4096;    // the size of shared memory
+    const char *name = "OS";  // the name of shared memory
+    const char *message_0 = "Hello, ";
+    const char *message_1 = "Shared Memory!\n";
+
+    int shm_fd;   // the file descriptor of shared memory
+    char *ptr;    // pointer to shared memory
+
+    /* create the shared memory object */
+    shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
+
+    /* configure the size of the shared memory */
+    ftruncate(shm_fd, SIZE);
+
+    /* map the shared memory object */
+    ptr = (char *)mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+
+    /* write to the shared memory */
+    sprintf(ptr, "%s", message_0); // 쓰고 난 다음
+    ptr += strlen(message_0);      // 포인트를 옮김
+    sprintf(pts, "%s", message_1);
+    ptr += strlen(message_1);
+
+    return 0;
+  }
+  ```
+- `$ gcc 3.16_shm_producer.c -lrt`
+
+- ```c
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <fcntl.h>
+  #include <sys/shm.h>
+  #include <sys/stat.h>
+  #include <sys/mman.h>
+
+  int main()
+  {
+    const int SIZE = 4096;    // the size of shared memory
+    const char *name = "OS";  // the name of shared memory
+
+    int shm_fd;   // the file descriptor of shared memory
+    char *ptr;    // pointer to shared memory
+
+    /* create the shared memory object */
+    shm_fd = shm_open(name, O_RDONLY, 0666);
+
+    /* map the shared memory object */
+    ptr = (char *)mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+
+    /* read from the shared memory object */
+    printf("%s", (char *)ptr);    // 제일 첫 부분,..
+
+    /* remove the shared memory */
+    shm_unlink(name);
+
+    return 0;
+  }
+  ```
+- `$ gcc 3.16_shm_consumer.c -lrt`
+
+
+## 3.7.2. Pipes
+- pipe 구현의 네가지 이슈
+  1. unidirectional / bidirectional communication을 할 것인가?
+  2. two-way communication이 가능한가. half-duplex / full-duplex
+  3. 커뮤니케이션 간 relationship이 존재하는가?
+  4. pipe가 네트워크를 통해 통신할 수 있는가?
+- 두가지 타입
+  + Ordinary pipes
+    * 외부에서 접근할 수 없음
+    * parent 프로세스는 파이프를 생성하고, 이를 사용해 파이프가 생성한 child 프로세서와 통신함
+    * ![image](https://github.com/led156/TIL/assets/67251510/9b874071-bb57-489e-8d18-be9efe76e3b3)
+    * `pipe(int fd[])`
+    * `fd[0]` : the read end of the pipe
+    * `fd[1]` : the write end
+    * ```c
+      #include <stdio.h>
+      #include <string.h>
+      #include <unistd.h>
+      #include <sys/types.h>
+
+      #define BUFFER_SIZE 25
+      #define READ_END 0
+      #define WRITE_END 1
+
+      int main()
+      {
+        char write_msg[BUFFER_SIZE] = "Greetings";
+        char read_msg[BUFFER_SIZE];
+        int fd[2];
+        pid_t pid;
+
+        /* create the pipe */
+        pipe(fd);
+
+        pid = fork(); // fort a new process
+
+        if (pid > 0) { // parent process
+          close(fd[READ_END]);
+          /* write to the pipe */
+          write(fd[WRITE_END], write_msg, strlen(write_msg) + 1);
+          close(fd[WRITE_END]);
+        }
+        else if (pid == 0) {  // child process
+          close(fd[WRITE_END]);
+          /* read to the pipe */
+          read(fd[READ_END], read_msg, BUFFER_SIZE);
+          printf("read %s\n", read_msg);
+          close(fd[READ_END]);
+        }
+      }
+      ```
+
+  + Named pipes
+    * 부모-자식 관계 없이 접근할 수 있음.
+
+
+
+# 3.8. Communication in Client-Server Systems
+- client-server systems
+  + Sockets : 통신을 위한 endpoint 정의 (IP address, port number)
+    - ![image](https://github.com/led156/TIL/assets/67251510/e2a9f2c4-61f2-4a86-bddb-47f59849e5ea)
+    - Java 제공 소켓 인터페이스
+      + Socket class : connection-oriented (TCP)
+      + DatagramSocket class : connectionless (UDP)
+      + MulticastSocket class : multiple recipients
+      + ```java
+        import java.net.*;
+        import java.io.*;
+        
+        public class DataServer {
+          public static void main(String[] args) throws Exception {
+            ServerSocket server = new ServerSocket(6013);
+        
+            /* Now listen for connections */
+            while (true) {
+              Socket client = server.accept();
+              PrintWriter pout = new PrintWrite(client.getOutputStream(), true);
+        
+              /* write the Date to the socket */
+              pout.println(new java.util.Date().toString());
+        
+              /* close the socket and resume listening for connections */
+              client.close()
+            }
+          }
+        }
+        ```
+        
+        
+      + ```java
+        import java.net.*;
+        import java.io.*;
+        
+        public class DataClient {
+          public static void main(String[] args) throws Exception {
+            Socket socket = new Socket("127.0.0.1", 6013);
+        
+            InputStream in = socket.getInputStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        
+            /* read date from the socket */
+            String line = null;
+            while ((line = br.readLine()) != null)
+              System.out.println(line);
+        
+            /* close the socket connections */
+            socket.close();
+          }
+        }
+        ```
+
+
+  + RPCs (Remote Procedure Calls) : 네트워크 시스템의 프로세스 간 절차 호출을 추상화
+    - 원격 서비스의 형태
+    - 네트워크 연결을 통해 원격 제어 가능
+    - 클라이언트는 리모트 호스트에 있는 procedure(프로시저)를 불러옴
+    - client에 stub을 제공함으로써 통신의 세부 정부를 숨김
+    - 파라미터를 marshals함
+    - ![image](https://github.com/led156/TIL/assets/67251510/18d31802-6048-4b3d-ab99-2f4427c8ba2a)
 
 
 
