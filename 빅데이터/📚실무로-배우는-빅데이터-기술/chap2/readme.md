@@ -33,7 +33,45 @@
 4. 스마트카 물품구매 이력 데이터셋 
 
 # 2.2. 빅데이터 파일럿 아키텍처 이해
+## 소프트웨어 아키텍처
+[![image](https://github.com/led156/TIL/assets/67251510/0a187158-5e63-4281-8023-761587505a3f)](https://ldy0212.tistory.com/entry/%EB%B9%85%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98?category=725016)
 
+
+[![image](https://github.com/led156/TIL/assets/67251510/fcf7b1b5-1426-47c5-9600-faf6adcfa860)](https://ldy0212.tistory.com/entry/%EB%B9%85%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98?category=725016)
+- 하둡을 중심으로 앞쪽을 수집/적재 (전처리), 뒤쪽을 탐색/분석 (후처리) 영역으로 나눌 수 있다.
+
+### 수집 레이어
+[![image](https://github.com/led156/TIL/assets/67251510/a5dfd0c5-1a26-4d8e-a714-499adc81a5a9)](https://ldy0212.tistory.com/entry/%EB%B9%85%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-%EB%A0%88%EC%9D%B4%EC%96%B4-%EB%B3%84)
+- 플럼 : 차량의 로그 수집
+- 스톰 : 실시간 로그 이벤트 처리
+- 카프카 : 데이터의 안정적인 수집을 위해 버퍼링 및 트랜잭션 처리 담당
+
+
+### 적재 레이어
+[![image](https://github.com/led156/TIL/assets/67251510/cea179a7-9c56-47c6-9322-ef48943aa262)](https://ldy0212.tistory.com/entry/%EB%B9%85%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-%EB%A0%88%EC%9D%B4%EC%96%B4-%EB%B3%84)
+- 적재 대상 : 하둡, HBase, 레디스
+- 요구사항1의 대용량 로그 파일 : 플럼 → 하둡으로 적재
+- 요구사항2의 실시간 데이터 : 플럼 → 카프카 → 스톰(실시간 이벤트 분석 수행) → HBase/레디스로 나누어 적재
+
+### 처리/탐색 레이어
+[![image](https://github.com/led156/TIL/assets/67251510/ee9de335-e56d-4d26-a029-29dc8cbcc9b4)](https://ldy0212.tistory.com/entry/%EB%B9%85%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-%EB%A0%88%EC%9D%B4%EC%96%B4-%EB%B3%84)
+- 하이브 : 정제/변형/통합/분리/탐색 등의 작업을 수행하고, 데이터를 정형화된 구조로 정규화해 데이터 마트를 만듦.
+- 스쿱 : 가공/분석된 데이터를 외부로 제공하기 위해 이용
+- 우지 : 데이터 품질을 높이기 위해 과정이 길고 복잡해지기 마련, 워크플로로 프로세스를 구성해 복잡도를 낮추고 자동화함.
+
+
+### 분석/응용 레이어
+[![image](https://github.com/led156/TIL/assets/67251510/7422bc90-4091-4be7-a05b-3d50bbc24381)](https://ldy0212.tistory.com/entry/%EB%B9%85%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-%EB%A0%88%EC%9D%B4%EC%96%B4-%EB%B3%84)
+- 임팔라 또는 제플린 : 스마트카의 상태 점검 및 운행 패턴을 빠르게 분석하기 위함
+- 머하웃&스파크ML : 데이터 분석을 위해 군집, 분류/예측, 추천 등을 진행
+- R / 텐서플로 + 플라스크 : 통계분석 진행 / 딥러닝 모델 및 서비스 API 제공
+
+
+## 하드웨어 아키텍처
+![image](https://github.com/led156/TIL/assets/67251510/b97aa8af-2534-4130-b2b4-827282f0eae6)
+
+![image](https://github.com/led156/TIL/assets/67251510/8cf915de-0ea2-4f2f-a037-fdc3513ad671)
+- 빅데이터 자동화 관리툴 : 클라우데라 CM 이용
 
 
 # 2.3. 빅데이터 파일럿 프로젝트용 PC 환경 구성
