@@ -1,4 +1,9 @@
+
+
+
 # Novice High
+![image](https://github.com/led156/TIL/assets/67251510/6c2dff72-4e49-4057-b931-e7db3d7d1787)
+
 ## 02 배열, 연결 리스트
 
 
