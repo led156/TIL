@@ -251,9 +251,140 @@
   ```
 
 - Exercise 4.17
-  ```
-  
-  ```
+  + <img width="705" alt="image" src="https://github.com/user-attachments/assets/fcadcbfc-77f0-472a-a612-72ef64b4db29">
+
+- Exercise 4.19
+  + ```c
+    #include <stdio.h>
+    #include <unistd.h>
+    #include <wait.h>
+    #include <pthread.h>
+
+    int value = 0;
+    void * runner(void *param);
+    
+    int main(int argc, char *argv[])
+    {
+      pid_t pid;
+      pthread_t tid;
+      pthread_attr_t attr;
+      pid = fork();
+      if (pid == 0) { // child process
+        pthread_attr_init(&attr);
+        pthread_create(&tid, &attr, runner, NULL);
+        pthread_join(tid, NULL);
+        printf("CHILD: value = %d\n", value); // LINE C
+      }
+      else if (pid > 0) { // parent process
+        wait(NULL);
+        printf("PARENT: value = %d\n", value); // LINE P
+      }
+    }
+    void *runner(void *param)
+    {
+      value = 5;
+      pthread_exit(0);
+    }
+    ```
+  + ```
+    CHILD: value = 5
+    PARENT: value = 0
+    ```
+
+
+# 4.5. Implicit Threading
+
+
+- 4가지의 대체 접근법
+  + Thread Pools
+    * create a number of threads in a pool where they await work. 작업을 기다리는 풀에 여러 개의 스레드를 만듦.
+  + Fork & Join
+    * explicit threading, but an excellent candidate for implicit threading. 
+  + OpenMP
+    * a set of compiler directives and an API for programs written in C/C++. 컴파일러 지시 집합 & C/C++로 작성된 프로그램에 대한 API
+    * 병렬로 실행할 수 있는 코드 블럭을 식별함. → 해당 지역에 대해서 알아서 멀티스레딩되도록 함
+    * 예제1
+      + ```c
+        #include <stdio.h>
+        #include <omp.h>
+        int main(int argc, char *argv[])
+        {
+          #pragma omp parallel // compiler directive
+          {
+            printf("I am a parallel region.\n");
+          }
+          return 0;
+        }
+        ```
+      + ```
+        $ gcc -fopenmp 4.20_OpenMP1.c
+        > I am a parallel region.
+        > I am a parallel region.
+        > ...
+        ```
+    * 예제2
+      + ```c
+        #include <stdio.h>
+        #include <omp.h>
+        int main(int argc, char *argv[])
+        {
+          omp_set_num_threads(4);
+          #pragma omp parallel
+          {
+            printf("OpenMP thread: %d\n", omp_get_thread_num()); // 실행 순서는 항상 다름
+          }
+          return 0;
+        }
+        ```
+      + ```
+        OpenMP thread: 0
+        OpenMP thread: 3
+        OpenMP thread: 1
+        OpenMP thread: 2
+        ```
+    * 예제3
+      + ```c
+        #include <stdio.h>
+        #include <omp.h>
+        #define SIZE 100000000
+
+        int a[SIZE], b[SIZE], c[SIZE];
+
+        int main(int argc, char *argv[])
+        {
+          int i;
+          for (i = 0; i < SIZE; ++i)
+            a[i] = b[i] = i;
+
+          #pragma omp parallel for
+          for (i = 0; i < SIZE; ++i) {
+            c[i] = a[i] + b[i];
+          }
+
+          return 0;
+        }
+        ```
+      + ```
+        $ time ./sum_not_parallel (omp parallel 하지 않은 프로그램)
+        real 0m0.586s
+        user 0m0.364s
+        sys 0m0.223s
+        $ time ./sum_with_openmp (omp parallel 한 프로그램)
+        real 0m0.423s
+        user 0m1.091s
+        sys 0m0.441s
+        ```
+      + omp parallel 할 때, sys(커널 스레드)에서 다 처리함 → 따라서 sys time으로만 봄.
+  + Grand Central Dispatch (GCD)
+    * developed by Apple for its macOS and iOS operating system. macOS & iOS 운영체제용
+
+
+
+
+
+
+
+
 
 
 
