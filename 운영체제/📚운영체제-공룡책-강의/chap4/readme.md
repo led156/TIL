@@ -194,14 +194,44 @@
 - 스레드의 종류 : user / kernel
   + user thread : user mode 위에서 실행. (커널의 서포팅 X)
   + kernel thread : 운영체제가 직접 매니징함.
+  + <details>
+    <summary>❓ User thread vs. Kernel thread</summary>
+    [Thread (2) - Multithreading Model, Implicit Threading, and Other Issues](https://jooona.tistory.com/9)
+    [system call/function call](https://jungtak.tistory.com/129)
+    [오버헤드가 발생하는 상황](https://megak.tistory.com/151)
+    
+    - 어떤 작업이든 kernel이 개입하는 순간 시스템콜이 필수적으로 필요함 → 성능적으로 큰 overhead 발생 & 속도 저하
+      + 시스템 콜 : OS커널안에 있는 부분을 호출하는 것. (모드 스위치 발생하기 때문에 => 오버헤드 큼)
+        1. 프로세스 상태 저장
+        2. 모드 스위치 (kernel이 CPU 사용)
+        3. kernel에서 전달받은 파라미터 검사
+        4. 시스템 콜에 해당하는 함수 사용
+        5. kernel 상태 저장
+        6. 모드 스위치 (caller 프로세스 전환)
+ 
+   - user thread : kernel과 무관하게 동작하기 때문에 비교적 빠름. thread 끼리의 스위칭이나 스케쥴링도 비교적 간편함. 다만 kernel이 user thread 존재를 모르기 때문에 kernel과의 소통이 힘듦.
+   - kernel thread : 스케쥴링과 같은 결정을 내려야 하는 상황에서, thread가 많은 프로세스에 우선순위를 주는 등의 고려가 가능함. (하지만 오버헤드와, kernel 복잡도가 굉장히 증가함 + 연산속도 비교적 느림)
+    
+    
+    </details>
 
 1. Many-to-One Model
+   + user thread를 사용하는 장점과 유사함. 빠르고 생성 및 관리가 쉬움.
+   + 다만, 하나의 스레드라도 시스템콜을 수행하다가 block이 되면 kernel과 연결되어 있는 길이 하나뿐이기 때문에 모든 스레드들이 block됨.
+   + 빠르고 쉬운 관리와 시스템 콜을 잘 사용하지 않는 경우에 유리할듯.
    + ![image](https://github.com/user-attachments/assets/8fe88268-6136-4b84-ae16-391c2fabce09)
 
-2. One-to-One Model
+3. One-to-One Model
+   + 스레드 하나가 block 되더라도 다른 스레드들은 정상적으로 작동 가능하며, 동시성(concurrency)을 보장함.
+   + 여러 개의 멀티코어 시스템에서 여러 개의 스레드들이 병렬적으로 실행이 가능하다는 장점도 있음.
+   + 다만 스레드 생성과 관리가 어렵기 때문에, 스레드가 많아지게 되면 성능에 큰 부담이 됨.
+   + 시스템들은 스레드의 최대 개수를 정해두어 관리하는 방법으로 오버헤드를 방지함.
    + ![image](https://github.com/user-attachments/assets/9fc7af7f-7e05-49b6-ad2a-1b66ce6a8c2e)
 
-3. Many-to-Many Model
+5. Many-to-Many Model
+   + user thread > kernel thread
+   + kernel 스레드가 여러 개 존재하기 때문에 멀티코어 시스템에서 병렬적인 수행이 가능.
+   + 많은 수의 스레드들이 좀 더 쉽게 지원되는 장점을 가지지만, 구현이 어려움.
    + ![image](https://github.com/user-attachments/assets/9f53dc9c-1217-47d0-aa3d-eeb10f89e7cb)
 
 
@@ -296,11 +326,12 @@
 
 
 - 4가지의 대체 접근법
-  + Thread Pools
+  + Thread Pools (Implicit Threading)
     * create a number of threads in a pool where they await work. 작업을 기다리는 풀에 여러 개의 스레드를 만듦.
+    * 사용이 완료되면 스레드를 소멸시키기 않고 다시 반납시켜, 재사용함. (생성과 소멸로 인해 발생하는 오버헤드를 줄임)
   + Fork & Join
     * explicit threading, but an excellent candidate for implicit threading. 
-  + OpenMP
+  + OpenMP (Implicit Threading)
     * a set of compiler directives and an API for programs written in C/C++. 컴파일러 지시 집합 & C/C++로 작성된 프로그램에 대한 API
     * 병렬로 실행할 수 있는 코드 블럭을 식별함. → 해당 지역에 대해서 알아서 멀티스레딩되도록 함
     * 예제1
