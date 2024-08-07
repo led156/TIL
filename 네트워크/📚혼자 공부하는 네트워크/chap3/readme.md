@@ -79,6 +79,34 @@
 
  
 ### IPv6
+- 할당 가능한 IPv4 주소는 $2^32$개 = 약 43억 개
+- IPv6는 16바이트(128비트)로, $2^128$개로 많은 수를 할당할 수 있음
+
+![image](https://github.com/user-attachments/assets/137f135b-00e0-421a-aff0-985558c77ed5)
+
+1. 다음 헤더 (next header)
+   ![image](https://github.com/user-attachments/assets/1a6ab2f2-e90b-4057-9f35-ed8fcac2d68a)
+
+   + 상위 계층의 프로토콜을 가리키거나 확장 헤더를 가리킴
+   + 확장 헤더? : IPv6의 추가적인 헤더 정보가 필요할 때 가지는 추가 헤더 (기본 헤더와 페이로드 데이터 사이에 위치)
+     * 홉 간 옵션, Hop-by-Hop Options : 모든 경로의 네트워크 장비가 패킷을 검사하도록 함
+     * 수신지 옵션, Destination Options : 수신지에서만 패킷을 검사하도록 하는 수신지 옵션
+     * 라우팅, Routing : 라우팅 관련 정보를 운반
+     * 단편, Fragment : 단편화를 위한 단편  → 필드가 하닌 확장 헤더를 통해 단편화가 이뤄짐.
+       - ![image](https://github.com/user-attachments/assets/d806c79d-3cf8-499a-967e-874c82b647a1)
+       - 다음 헤더를 통해 또 다른 확장 헤더를 가리킬 수 있음
+       - 단편화 오프셋 : M플래그(현재 단편화된 패킷의 위치. 0이면 마지막 패킷), 식별자(동일한 메시지에서부터 단편화된 패킷임) 필드로 IPv4와 같은 역할을 함.
+
+     * ESP, Enscapsulating Security Payload / AH, Authenication Header : 암호화와 인증을 위함
+3. 홉 제한 (hop limit)
+   + IPv4 패킷의 TTL 필드와 비슷하게 패킷의 수명을 나타내는 필드
+5. 송신지 IP 주소
+6. 수신지 IP 주소
+   + IPv4 패킷의 헤더 길이는 가변적임 (옵션, 패딩 필드가 선택적으로 존재)
+   + IPv6 기본 헤더는 40바이트로 고정적
+
+
+## ARP
 
 
 
